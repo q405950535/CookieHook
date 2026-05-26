@@ -1,4 +1,4 @@
-name: Build .deb (arm64+arm64e)
+name: Build CookieHook (arm64+arm64e)
 on:
   workflow_dispatch:
 
@@ -8,10 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install tools
-        run: brew install dpkg ldid make
+      - name: Install deps
+        run: |
+          brew install dpkg ldid make
 
-      - name: Install Theos
+      - name: Setup Theos
         run: |
           cd $HOME
           git clone --recursive https://github.com/theos/theos.git
@@ -21,10 +22,10 @@ jobs:
           THEOS: /Users/runner/theos
         run: |
           cd CookieHook
-          make clean package ARCHS=arm64 arm64e
+          make clean package ARCHS="arm64 arm64e"
 
-      - name: Upload .deb
+      - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
-          name: CookieHook
+          name: CookieHook-deb
           path: "**/packages/*.deb"
