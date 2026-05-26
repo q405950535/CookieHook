@@ -16,14 +16,13 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential git curl libbz2-dev libssl-dev
 
-      - name: 安装 Theos 并拉取 SDK
+      - name: 安装 Theos 并配置 SDK
         run: |
           export THEOS=$HOME/theos
           git clone --recursive https://github.com/theos/theos.git $THEOS
           echo "THEOS=$THEOS" >> $GITHUB_ENV
-          # 从官方仓库拉取 SDK
-          cd $THEOS
-          ./bin/install.sh
+          # 用绝对路径执行脚本
+          $THEOS/bin/install.sh
 
       - name: 编译 Tweak
         working-directory: ./CookieHook
