@@ -1,4 +1,4 @@
-name: Build .deb
+name: Build .deb (arm64+arm64e)
 on:
   workflow_dispatch:
 
@@ -11,21 +11,19 @@ jobs:
       - name: Install tools
         run: brew install dpkg ldid make
 
-      - name: Install Theos with FULL dependencies
+      - name: Install Theos
         run: |
           cd $HOME
           git clone --recursive https://github.com/theos/theos.git
-          
+
       - name: Build
         env:
           THEOS: /Users/runner/theos
-          TARGET: iphone:clang::15.0
-          ARCHS: arm64
         run: |
           cd CookieHook
-          make clean package
+          make clean package ARCHS=arm64 arm64e
 
-      - name: Upload
+      - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: CookieHook
