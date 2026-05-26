@@ -9,11 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # 提前强制用 Node 24，避免未来报错
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      THEOS: $HOME/theos
     steps:
-      # 升级到支持 Node 24 的 v5
       - uses: actions/checkout@v5
 
       - name: 安装依赖
@@ -21,17 +18,17 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential git curl libbz2-dev libssl-dev
 
-      - name: 安装 Theos
+      - name: 安装 Theos（写死路径 /home/runner/theos）
         run: |
-          git clone --recursive https://github.com/theos/theos.git $THEOS
+          git clone --recursive https://github.com/theos/theos.git /home/runner/theos
 
-      - name: 编译 Tweak
+      - name: 编译（绝对路径调用 make）
         working-directory: ./CookieHook
         run: |
-          make clean
-          make package
+          export THEOS=/home/runner/theos
+          /usr/bin/make clean
+          /usr/bin/make package
 
-      # upload-artifact v4 也会报警告，先保留，不影响；有 v5 再升
       - name: 上传 .deb
         uses: actions/upload-artifact@v4
         with:
