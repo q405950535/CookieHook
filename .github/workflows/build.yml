@@ -14,24 +14,14 @@ jobs:
       - name: 安装依赖
         run: |
           sudo apt update
-          sudo apt install -y build-essential git curl wget libbz2-dev libssl-dev
+          sudo apt install -y build-essential git curl libbz2-dev libssl-dev
 
-      - name: 安装 Theos
+      - name: 安装 Theos + 自动配置 SDK（稳定版）
         run: |
           export THEOS=$HOME/theos
-          git clone --recursive https://github.com/theos/theos.git $THEOS
           echo "THEOS=$THEOS" >> $GITHUB_ENV
-
-      - name: 手动下载 iPhoneOS15.0.sdk（稳定）
-        run: |
-          export THEOS=$HOME/theos
-          mkdir -p $THEOS/sdks
-          cd $THEOS/sdks
-          # 用一个长期有效的镜像
-          wget -O iPhoneOS15.0.sdk.tar.xz https://github.com/xybp888/iOS-SDKs/raw/master/iPhoneOS15.0.sdk.tar.xz
-          tar -xf iPhoneOS15.0.sdk.tar.xz
-          rm iPhoneOS15.0.sdk.tar.xz
-          ls -la $THEOS/sdks
+          # 用官方推荐的一键安装方式
+          curl -s https://raw.githubusercontent.com/theos/theos/master/bin/install-theos | bash
 
       - name: 编译 Tweak
         working-directory: ./CookieHook
