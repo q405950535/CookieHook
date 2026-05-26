@@ -22,12 +22,25 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
         run: |
+          # 找到 Tweak.x 所在的目录
           TWEAK_DIR=$(find . -name "Tweak.x" -exec dirname {} \; | head -1)
+          echo "找到 Tweak 目录: $TWEAK_DIR"
           cd "$TWEAK_DIR"
+          # 执行构建并输出日志
           make clean package 2>&1 | tee build.log
+
+      - name: Debug - 定位 .deb 文件
+        run: |
+          echo "=== 工作区根目录 ==="
+          pwd
+          echo "=== 查找所有 .deb 文件 ==="
+          find ${{ github.workspace }} -name "*.deb"
+          echo "=== 项目目录结构 ==="
+          ls -R ${{ github.workspace }}
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
-          name: CookieHook
-          path: "**/packages/*.deb"
+          name: CookieHook.deb
+          # 这里先写通用路径，跑完 Debug 步骤后，根据日志改成真实路径
+          path: "**/*.deb"
