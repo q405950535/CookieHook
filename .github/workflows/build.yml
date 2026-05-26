@@ -1,36 +1,38 @@
 name: Build .deb
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    runs-on: macos-15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - name: 安装依赖
+      - name: Setup Theos
         run: |
-          sudo apt update
-          sudo apt install -y build-essential git curl libbz2-dev libssl-dev
+          brew install pkg-config openssl md5sha1sum
+          cd $HOME
+          git clone --depth=1 https://github.com/theos/theos.git
+          cd $HOME/theos
+          git clone --depth=1 https://github.com/theos/sdks.git sdks
+          mkdir -p bin
+          curl -L -o bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
+          chmod +x bin/ldid
 
-      - name: 安装 Theos（写死路径 /home/runner/theos）
+      - name: Build
+        env:
+          THEOS: ${{ github.workspace }}/theos
+          PATH: ${{ github.workspace }}/theos/bin:${{ github.workspace }}/theos/sdks/bin:${{ github.workspace }}/theos/sdks/usr/bin:${{ github.workspace }}/theos/bin:$PATH
         run: |
-          git clone --recursive https://github.com/theos/theos.git /home/runner/theos
+          echo "THEOS=$THEOS"
+          echo "PATH=$PATH"
+          ls $THEOS/
+          cd project_files/CookieHook
+          make clean package 2>&1 | tee build.log
 
-      - name: 编译（绝对路径调用 make）
-        working-directory: ./CookieHook
-        run: |
-          export THEOS=/home/runner/theos
-          /usr/bin/make clean
-          /usr/bin/make package
-
-      - name: 上传 .deb
+      - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: CookieHook.deb
-          path: ./CookieHook/packages/*.deb
+          path: project_files/CookieHook/*.deb
