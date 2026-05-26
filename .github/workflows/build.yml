@@ -1,4 +1,4 @@
-name: Build .deb
+name: Build .deb (iOS 18.4)
 on:
   workflow_dispatch:
 
@@ -8,35 +8,40 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup Theos
+      - name: Install dependencies
         run: |
           brew install dpkg
+
+      - name: Setup Theos + iOS 18.4 SDK
+        run: |
           cd $HOME
+          # 克隆 theos
           git clone --depth=1 https://github.com/theos/theos.git
-          
-          # 安装工具
+          # 补全必要工具
           curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
           chmod +x theos/bin/dm.pl
           curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_arm64
           chmod +x theos/bin/ldid
-          
-          # 只下载你需要的 iPhoneOS15.0.sdk，不下载全部！！！
-          mkdir -p theos/sdks/iPhoneOS15.0.sdk
-          cd theos/sdks/iPhoneOS15.0.sdk
-          curl -L https://github.com/theos/sdks/archive/refs/heads/master.zip -o sdk.zip
-          unzip -q sdk.zip sdks-master/iPhoneOS15.0.sdk/**/*
-          mv sdks-master/iPhoneOS15.0.sdk/* .
-          rm -rf sdks-master sdk.zip
 
-      - name: Build
+          # 下载并安装 iPhoneOS18.4.sdk
+          mkdir -p theos/sdks
+          cd theos/sdks
+          # 拉取官方 sdks 仓库（含 18.4）
+          git clone --depth=1 https://github.com/theos/sdks.git tmp-sdks
+          # 只保留 18.4
+          cp -r tmp-sdks/iPhoneOS18.4.sdk .
+          rm -rf tmp-sdks
+
+      - name: Build with iOS 18.4
         env:
           THEOS: /Users/runner/theos
         run: |
           cd CookieHook
-          make clean package
+          # 直接在命令行覆盖 TARGET，强制 18.4
+          make clean package TARGET=iphone:clang:18.4:18.4 ARCHS=arm64
 
-      - name: Upload
+      - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
-          name: CookieHook
+          name: CookieHook-iOS18.4
           path: "**/packages/*.deb"
