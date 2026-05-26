@@ -13,24 +13,29 @@ jobs:
         run: |
           brew install dpkg perl make
           cd $HOME
-          git clone --recurse-submodules https://github.com/theos/theos.git
-          cd theos
-          ./install.sh
-          # 直接下载完整 SDK 包，解压到正确位置
+          git clone --depth=1 https://github.com/theos/theos.git
+          # 安装工具
+          curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
+          chmod +x theos/bin/dm.pl
+          curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_arm64
+          chmod +x theos/bin/ldid
+          # 安装 SDK 到 正确路径！！！
+          mkdir -p theos/sdks
+          cd theos/sdks
           curl -L -o sdks.zip https://github.com/theos/sdks/archive/refs/heads/master.zip
           unzip -q sdks.zip
-          mv sdks-master sdks
-          rm sdks.zip
+          cp -r sdks-master/* .
+          rm -rf sdks-master sdks.zip
 
       - name: Build
         env:
           THEOS: /Users/runner/theos
-          THEOS_DEVICE_IP: 127.0.0.1
+          PATH: "/opt/homebrew/opt/make/libexec/gnubin:$PATH"
         run: |
           cd CookieHook
           make clean package
 
-      - name: Upload
+      - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: CookieHook
