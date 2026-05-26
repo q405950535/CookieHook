@@ -1,5 +1,4 @@
 name: Build .deb
-
 on:
   workflow_dispatch:
 
@@ -11,31 +10,32 @@ jobs:
 
       - name: Setup Theos
         run: |
-          brew install dpkg perl make
+          brew install dpkg
           cd $HOME
           git clone --depth=1 https://github.com/theos/theos.git
+          
           # 安装工具
           curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
           chmod +x theos/bin/dm.pl
           curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_arm64
           chmod +x theos/bin/ldid
-          # 安装 SDK 到 正确路径！！！
-          mkdir -p theos/sdks
-          cd theos/sdks
-          curl -L -o sdks.zip https://github.com/theos/sdks/archive/refs/heads/master.zip
-          unzip -q sdks.zip
-          cp -r sdks-master/* .
-          rm -rf sdks-master sdks.zip
+          
+          # 只下载你需要的 iPhoneOS15.0.sdk，不下载全部！！！
+          mkdir -p theos/sdks/iPhoneOS15.0.sdk
+          cd theos/sdks/iPhoneOS15.0.sdk
+          curl -L https://github.com/theos/sdks/archive/refs/heads/master.zip -o sdk.zip
+          unzip -q sdk.zip sdks-master/iPhoneOS15.0.sdk/**/*
+          mv sdks-master/iPhoneOS15.0.sdk/* .
+          rm -rf sdks-master sdk.zip
 
       - name: Build
         env:
           THEOS: /Users/runner/theos
-          PATH: "/opt/homebrew/opt/make/libexec/gnubin:$PATH"
         run: |
           cd CookieHook
           make clean package
 
-      - name: Upload .deb
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: CookieHook
