@@ -4,28 +4,13 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: ubuntu-latest
+    container: ghcr.io/elihwyma/theos:latest
+    
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install tools
-        run: brew install dpkg ldid make
-
-      - name: Setup Theos
-        run: |
-          cd $HOME
-          git clone --depth=1 https://github.com/theos/theos.git
-          # 自动补齐缺失的 vendor 目录
-          cd theos
-          mkdir -p vendor/include vendor/lib
-          curl -L -o bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
-          chmod +x bin/dm.pl
-
-      - name: Build
-        env:
-          THEOS: /Users/runner/theos
-          TARGET: iphone:clang::15.0
-          ARCHS: arm64
+      - name: Build Tweak
         run: |
           cd CookieHook
           make clean package
