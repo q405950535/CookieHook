@@ -1,4 +1,4 @@
-name: Build .deb (iOS 18.4)
+name: Build .deb
 on:
   workflow_dispatch:
 
@@ -8,40 +8,28 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: |
-          brew install dpkg
+      - name: Install tools
+        run: brew install dpkg ldid
 
-      - name: Setup Theos + iOS 18.4 SDK
+      - name: Setup Theos
         run: |
           cd $HOME
-          # 克隆 theos
           git clone --depth=1 https://github.com/theos/theos.git
-          # 补全必要工具
           curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
           chmod +x theos/bin/dm.pl
-          curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_arm64
-          chmod +x theos/bin/ldid
 
-          # 下载并安装 iPhoneOS18.4.sdk
-          mkdir -p theos/sdks
-          cd theos/sdks
-          # 拉取官方 sdks 仓库（含 18.4）
-          git clone --depth=1 https://github.com/theos/sdks.git tmp-sdks
-          # 只保留 18.4
-          cp -r tmp-sdks/iPhoneOS18.4.sdk .
-          rm -rf tmp-sdks
-
-      - name: Build with iOS 18.4
+      - name: Build
         env:
           THEOS: /Users/runner/theos
+          # 🔥 强制使用 Xcode 自带 SDK，彻底解决所有 SDK 不存在问题
+          TARGET: iphone:clang:17.5:15.0
+          ARCHS: arm64
         run: |
           cd CookieHook
-          # 直接在命令行覆盖 TARGET，强制 18.4
-          make clean package TARGET=iphone:clang:18.4:18.4 ARCHS=arm64
+          make clean package
 
-      - name: Upload .deb
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: CookieHook-iOS18.4
+          name: CookieHook
           path: "**/packages/*.deb"
