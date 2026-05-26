@@ -14,8 +14,6 @@ jobs:
           brew install pkg-config openssl md5sha1sum
           cd $HOME
           git clone --depth=1 https://github.com/theos/theos.git
-          cd $HOME/theos
-          git clone --depth=1 https://github.com/theos/sdks.git sdks
           mkdir -p bin
           curl -L -o bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
           chmod +x bin/ldid
