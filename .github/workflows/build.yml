@@ -4,16 +4,37 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: ghcr.io/elihwyma/theos:latest
-    
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
-      - name: Build Tweak
+      - name: Install dependencies (fix gmake → make)
+        run: |
+          brew install dpkg ldid make
+          ln -s /usr/local/bin/make /usr/local/bin/gmake
+
+      - name: Setup Theos properly (fix vendor missing)
+        run: |
+          cd $HOME
+          rm -rf theos
+          git clone --depth=1 --recursive https://github.com/theos/theos.git
+          cd theos
+          # 强制补全 vendor 目录
+          mkdir -p vendor/include vendor/lib
+          # 执行官方更新脚本
+          bin/update-theos
+
+      - name: Build CookieHook
+        env:
+          THEOS: /Users/runner/theos
+          # 明确指定存在的 SDK，避免 17.5 不存在
+          TARGET: iphone:clang::15.0
+          ARCHS: arm64
         run: |
           cd CookieHook
-          make clean package
+          gmake clean package
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
