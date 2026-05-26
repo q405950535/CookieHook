@@ -14,6 +14,7 @@ jobs:
           brew install pkg-config openssl md5sha1sum
           cd $HOME
           git clone --depth=1 https://github.com/theos/theos.git
+          # theos 自带 sdks，不需要额外 clone
           mkdir -p bin
           curl -L -o bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
           chmod +x bin/ldid
@@ -21,11 +22,7 @@ jobs:
       - name: Build
         env:
           THEOS: ${{ github.workspace }}/theos
-          PATH: ${{ github.workspace }}/theos/bin:${{ github.workspace }}/theos/sdks/bin:${{ github.workspace }}/theos/sdks/usr/bin:${{ github.workspace }}/theos/bin:$PATH
         run: |
-          echo "THEOS=$THEOS"
-          echo "PATH=$PATH"
-          ls $THEOS/
           cd project_files/CookieHook
           make clean package 2>&1 | tee build.log
 
