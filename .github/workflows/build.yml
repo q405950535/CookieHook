@@ -11,12 +11,13 @@ jobs:
       - name: Install tools
         run: brew install dpkg ldid make
 
+      # 🔥 完整安装 Theos（带所有子模块，解决 vendor 缺失）
       - name: Setup Theos
         run: |
           cd $HOME
-          git clone --depth=1 https://github.com/theos/theos.git
-          curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
-          chmod +x theos/bin/dm.pl
+          git clone --recurse-submodules https://github.com/theos/theos.git
+          cd theos
+          ./install.sh
 
       - name: Build
         env:
@@ -25,7 +26,7 @@ jobs:
           ARCHS: arm64
         run: |
           cd CookieHook
-          gmake clean package
+          make clean package
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
