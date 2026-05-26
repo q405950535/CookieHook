@@ -26,18 +26,8 @@ jobs:
           cd "$TWEAK_DIR"
           make clean package 2>&1 | tee build.log
 
-      # -------- 加在这里：打印目录、找 deb --------
-      - name: Locate .deb
-        run: |
-          TWEAK_DIR=$(find . -name "Tweak.x" -exec dirname {} \; | head -1)
-          cd "$TWEAK_DIR"
-          echo "=== Looking for deb ==="
-          find . -name "*.deb"
-          ls -R
-
       - name: Upload .deb
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: CookieHook-deb
-          # Theos 默认在 项目目录/packages/ 下
+          name: CookieHook
           path: "**/packages/*.deb"
