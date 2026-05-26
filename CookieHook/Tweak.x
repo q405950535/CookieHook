@@ -1,7 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-static NSString *logPath = @"/var/mobile/Media/safari_cookie_log.txt";
+// 🔥 按键精灵最容易读取的路径（通用、权限最高）
+static NSString *logPath = @"/var/mobile/Documents/CookieHook.txt";
 
 static void writeLog(NSString *content) {
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -16,12 +17,12 @@ static void writeLog(NSString *content) {
 
 %hook NSHTTPCookieStorage
 - (void)setCookie:(NSHTTPCookie *)cookie {
-    NSString *log = [NSString stringWithFormat:@"[+] %@ | %@ = %@\n",
-                    [NSDate date],
-                    cookie.name,
-                    cookie.value];
-    NSLog(@"CookieHook: %@", log);
-    writeLog(log);
+    // 只保存有用的 Cookie，过滤空值
+    if (cookie && cookie.name && cookie.value) {
+        NSString *log = [NSString stringWithFormat:@"%@=%@\n", cookie.name, cookie.value];
+        NSLog(@"[CookieHook] 捕获: %@", log);
+        writeLog(log);
+    }
     %orig;
 }
 %end
