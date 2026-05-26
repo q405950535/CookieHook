@@ -8,20 +8,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # 提前强制用 Node 24，避免未来报错
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      THEOS: $HOME/theos
     steps:
-      - uses: actions/checkout@v4
+      # 升级到支持 Node 24 的 v5
+      - uses: actions/checkout@v5
 
       - name: 安装依赖
         run: |
           sudo apt update
           sudo apt install -y build-essential git curl libbz2-dev libssl-dev
 
-      - name: 安装 Theos + 自动配置 SDK（稳定版）
+      - name: 安装 Theos
         run: |
-          export THEOS=$HOME/theos
-          echo "THEOS=$THEOS" >> $GITHUB_ENV
-          # 用官方推荐的一键安装方式
-          curl -s https://raw.githubusercontent.com/theos/theos/master/bin/install-theos | bash
+          git clone --recursive https://github.com/theos/theos.git $THEOS
 
       - name: 编译 Tweak
         working-directory: ./CookieHook
@@ -29,6 +31,7 @@ jobs:
           make clean
           make package
 
+      # upload-artifact v4 也会报警告，先保留，不影响；有 v5 再升
       - name: 上传 .deb
         uses: actions/upload-artifact@v4
         with:
