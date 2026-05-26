@@ -1,7 +1,7 @@
 ARCHS = arm64 arm64e
 TARGET = iphone:clang::15.0
-# 关键：开启 rootless 模式，自动适配路径
 THEOS_PACKAGE_SCHEME = rootless
+INSTALL_TARGET_PROCESSES = SpringBoard
 
 include $(THEOS)/makefiles/common.mk
 
