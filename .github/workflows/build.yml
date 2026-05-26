@@ -23,7 +23,9 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
         run: |
-          cd CookieHook/CookieHook
+          # 自动找到 Tweak.x 所在的目录并 cd 进去
+          TWEAK_DIR=$(find . -name "Tweak.x" -exec dirname {} \; | head -1)
+          cd "$TWEAK_DIR"
           make clean package 2>&1 | tee build.log
 
       - name: Upload .deb
