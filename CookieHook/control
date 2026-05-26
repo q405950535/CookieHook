@@ -1,0 +1,9 @@
+Package: com.user.cookiehook
+Name: CookieHook
+Version: 1.0
+Architecture: iphoneos-arm64
+Description: Safari Cookie Logger
+Maintainer: user
+Author: user
+Section: Tweaks
+Depends: mobilesubstrate
