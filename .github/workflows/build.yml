@@ -11,10 +11,9 @@ jobs:
 
       - name: Setup Theos
         run: |
-          brew install pkg-config openssl md5sha1sum
+          brew install pkg-config openssl md5sha1sum dpkg
           cd $HOME
           git clone --depth=1 https://github.com/theos/theos.git
-          # theos 自带 sdks，不需要额外 clone
           mkdir -p bin
           curl -L -o bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
           chmod +x bin/ldid
@@ -23,13 +22,22 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
         run: |
-          # 自动找到 Tweak.x 所在的目录并 cd 进去
           TWEAK_DIR=$(find . -name "Tweak.x" -exec dirname {} \; | head -1)
           cd "$TWEAK_DIR"
           make clean package 2>&1 | tee build.log
 
+      # -------- 加在这里：打印目录、找 deb --------
+      - name: Locate .deb
+        run: |
+          TWEAK_DIR=$(find . -name "Tweak.x" -exec dirname {} \; | head -1)
+          cd "$TWEAK_DIR"
+          echo "=== Looking for deb ==="
+          find . -name "*.deb"
+          ls -R
+
       - name: Upload .deb
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: CookieHook.deb
-          path: CookieHook/CookieHook/*.deb
+          name: CookieHook-deb
+          # Theos 默认在 项目目录/packages/ 下
+          path: "**/packages/*.deb"
