@@ -9,14 +9,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup Theos
+      - name: Setup Theos & tools
         run: |
-          brew install pkg-config openssl md5sha1sum dpkg
+          brew install pkg-config openssl md5sha1sum dpkg perl
           cd $HOME
           git clone --depth=1 https://github.com/theos/theos.git
-          mkdir -p bin
-          curl -L -o bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
-          chmod +x bin/ldid
+          # 补 dm.pl（关键！）
+          curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
+          chmod +x theos/bin/dm.pl
+          # ldid
+          mkdir -p theos/bin
+          curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
+          chmod +x theos/bin/ldid
 
       - name: Build
         env:
