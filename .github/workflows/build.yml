@@ -9,34 +9,33 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup Theos & tools
+      - name: Setup Theos + SDK + Tools
         run: |
           brew install pkg-config openssl md5sha1sum dpkg perl
           cd $HOME
           git clone --depth=1 https://github.com/theos/theos.git
-          # 补 dm.pl（关键！）
+          # 安装 dm.pl
           curl -L -o theos/bin/dm.pl https://raw.githubusercontent.com/theos/dm.pl/master/dm.pl
           chmod +x theos/bin/dm.pl
-          # ldid
-          mkdir -p theos/bin
-          curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
+          # 安装 ldid
+          curl -L -o theos/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_arm64
           chmod +x theos/bin/ldid
+          # 安装 iOS 15.0 SDK（匹配你的 Makefile）
+          mkdir -p theos/sdks
+          cd theos/sdks
+          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS15.0.sdk.tar.xz -o iPhoneOS15.0.sdk.tar.xz
+          tar -xf iPhoneOS15.0.sdk.tar.xz
+          rm iPhoneOS15.0.sdk.tar.xz
 
-      - name: Build
+      - name: Build Tweak
         env:
           THEOS: /Users/runner/theos
         run: |
-          TWEAK_DIR=$(find . -name "Tweak.x" -exec dirname {} \; | head -1)
-          echo "TWEAK_DIR = $TWEAK_DIR"
-          cd "$TWEAK_DIR"
-          make clean package 2>&1 | tee build.log
-
-      - name: Find .deb
-        run: |
-          find . -name "*.deb"
+          cd CookieHook
+          make clean package
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: CookieHook
-          path: "**/*.deb"
+          path: "**/packages/*.deb"
