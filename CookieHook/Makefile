@@ -1,5 +1,5 @@
 ARCHS = arm64 arm64e
-TARGET = iphone:clang:18.4:18.4
+TARGET = iphone:clang:17.5:15.0
 
 INSTALL_TARGET_PROCESSES = MobileSafari Safari
 
